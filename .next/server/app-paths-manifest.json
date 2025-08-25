@@ -1,9 +1,5 @@
 {
-  "/api/ai-assistant/route": "app/api/ai-assistant/route.js",
-  "/api/bookings/route": "app/api/bookings/route.js",
-  "/api/services/route": "app/api/services/route.js",
+  "/api/test-login/route": "app/api/test-login/route.js",
   "/api/vendors/login/route": "app/api/vendors/login/route.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
   "/vendor/dashboard/page": "app/vendor/dashboard/page.js"
 }
