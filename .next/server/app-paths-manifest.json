@@ -1,5 +1,6 @@
 {
-  "/api/test-login/route": "app/api/test-login/route.js",
-  "/api/vendors/login/route": "app/api/vendors/login/route.js",
-  "/vendor/dashboard/page": "app/vendor/dashboard/page.js"
+  "/api/vendors/verify-session/route": "app/api/vendors/verify-session/route.js",
+  "/page": "app/page.js",
+  "/vendor/dashboard/page": "app/vendor/dashboard/page.js",
+  "/vendor/services/page": "app/vendor/services/page.js"
 }

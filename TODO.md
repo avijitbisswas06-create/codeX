@@ -133,3 +133,8 @@
 - Vendor registration system in place
 - Modern UI with Tailwind CSS and shadcn/ui components
 - Ready for production deployment (add API keys to .env.local when ready)
+
+## New Tasks for AI Travel Assistant
+- [ ] Update vendor dashboard with new features.
+- [ ] Implement booking management.
+- [ ] Integrate AI recommendations.

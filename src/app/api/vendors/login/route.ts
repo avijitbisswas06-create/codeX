@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { connectToDatabase } from "@/lib/db"; // Move this to the top
 
 // Input validation schema
 const loginSchema = z.object({
@@ -13,25 +14,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
 
-    // In a real app, this would query your database
-    // For now, we'll use a mock implementation
-    const mockVendor = {
-      id: "vendor_123",
-      email: "demo@travelmarket.com",
-      password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // bcrypt hash for "password"
-      name: "Demo Vendor",
-    };
+const db = await connectToDatabase();
+const vendorCollection = db.collection("vendors"); // Assuming the collection is named "vendors"
 
-    // Check if email exists
-    if (email !== mockVendor.email) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
-    }
+const vendor = await vendorCollection.findOne({ email });
+if (!vendor) {
+  return NextResponse.json(
+    { error: "Invalid email or password" },
+    { status: 401 }
+  );
+}
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, mockVendor.password);
+    const isValidPassword = await bcrypt.compare(password, vendor.password);
     if (!isValidPassword) {
       return NextResponse.json(
         { error: "Invalid email or password" },
@@ -45,9 +40,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       sessionId,
-      vendorId: mockVendor.id,
-      vendorName: mockVendor.name,
-      email: mockVendor.email,
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      email: vendor.email,
     });
 
   } catch (error) {
