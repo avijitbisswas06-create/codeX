@@ -1,5 +1,28 @@
 import { NextResponse } from "next/server";
 
+// AI Provider Configuration
+const AI_CONFIG = {
+  // Primary: OpenRouter API (anthropic/claude-sonnet-4)
+  openRouter: {
+    enabled: false, // Set to true when OPENROUTER_API_KEY is provided
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model: "anthropic/claude-sonnet-4",
+    apiKey: process.env.OPENROUTER_API_KEY
+  },
+  
+  // Fallback: Hugging Face Inference API
+  huggingFace: {
+    enabled: false, // Set to true when HUGGINGFACE_API_KEY is provided
+    endpoint: "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+    apiKey: process.env.HUGGINGFACE_API_KEY
+  },
+  
+  // Backup: Simulated responses (always available)
+  simulated: {
+    enabled: true
+  }
+};
+
 export async function POST(request: Request) {
   try {
     const { message } = await request.json();
@@ -11,43 +34,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // Simulate AI response based on travel-related keywords
-    const response = generateTravelResponse(message);
+    let aiResponse: string;
     
-    // Optional: Uncomment below for real Hugging Face API integration
-    /*
-    const hfApiKey = process.env.HUGGINGFACE_API_KEY;
-    if (hfApiKey) {
+    // Try OpenRouter API first (if configured)
+    if (AI_CONFIG.openRouter.enabled && AI_CONFIG.openRouter.apiKey) {
       try {
-        const hfResponse = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${hfApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            inputs: `Travel Assistant: ${message}`,
-            parameters: {
-              max_length: 200,
-              temperature: 0.7,
-              do_sample: true
-            }
-          })
-        });
-        
-        if (hfResponse.ok) {
-          const hfData = await hfResponse.json();
-          const aiResponse = hfData.generated_text || hfData[0]?.generated_text || response;
-          return NextResponse.json({ response: aiResponse });
-        }
+        aiResponse = await callOpenRouterAPI(message);
+        return NextResponse.json({ response: aiResponse });
       } catch (error) {
-        console.error("Hugging Face API error:", error);
-        // Fall back to simulated response
+        console.error("OpenRouter API error:", error);
+        // Fall through to next provider
       }
     }
-    */
-
-    return NextResponse.json({ response });
+    
+    // Try Hugging Face API (if configured)
+    if (AI_CONFIG.huggingFace.enabled && AI_CONFIG.huggingFace.apiKey) {
+      try {
+        aiResponse = await callHuggingFaceAPI(message);
+        return NextResponse.json({ response: aiResponse });
+      } catch (error) {
+        console.error("Hugging Face API error:", error);
+        // Fall through to simulated response
+      }
+    }
+    
+    // Use simulated response as fallback
+    aiResponse = generateTravelResponse(message);
+    return NextResponse.json({ response: aiResponse });
+    
   } catch (error: any) {
     console.error("AI Assistant error:", error);
     return NextResponse.json(
@@ -55,6 +69,73 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+async function callOpenRouterAPI(message: string): Promise<string> {
+  const response = await fetch(AI_CONFIG.openRouter.endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${AI_CONFIG.openRouter.apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "X-Title": process.env.NEXT_PUBLIC_APP_NAME || "TravelMarket AI Assistant"
+    },
+    body: JSON.stringify({
+      model: AI_CONFIG.openRouter.model,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert AI travel assistant for TravelMarket. You help travelers with:
+- Destination recommendations and travel planning
+- Budget planning and cost estimation
+- Itinerary creation and activity suggestions
+- Travel tips, packing advice, and safety information
+- Booking assistance through our marketplace
+
+Always be helpful, friendly, and provide detailed, practical advice. When appropriate, suggest browsing our marketplace for specific services like accommodations, tours, or transportation.`
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+      stream: false
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenRouter API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
+}
+
+async function callHuggingFaceAPI(message: string): Promise<string> {
+  const response = await fetch(AI_CONFIG.huggingFace.endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${AI_CONFIG.huggingFace.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      inputs: `Travel Assistant: ${message}`,
+      parameters: {
+        max_length: 200,
+        temperature: 0.7,
+        do_sample: true
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hugging Face API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.generated_text || data[0]?.generated_text || "I apologize, but I couldn't generate a response. Please try again.";
 }
 
 function generateTravelResponse(message: string): string {

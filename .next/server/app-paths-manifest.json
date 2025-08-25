@@ -1,9 +1,9 @@
 {
+  "/api/ai-assistant/route": "app/api/ai-assistant/route.js",
+  "/api/bookings/route": "app/api/bookings/route.js",
+  "/api/services/route": "app/api/services/route.js",
   "/api/vendors/login/route": "app/api/vendors/login/route.js",
-  "/api/vendors/register/route": "app/api/vendors/register/route.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/vendor/dashboard/page": "app/vendor/dashboard/page.js",
-  "/vendor/login/page": "app/vendor/login/page.js",
-  "/vendor/register/page": "app/vendor/register/page.js"
+  "/vendor/dashboard/page": "app/vendor/dashboard/page.js"
 }
