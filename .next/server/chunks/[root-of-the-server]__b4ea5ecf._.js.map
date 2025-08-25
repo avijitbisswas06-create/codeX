@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 55, "column": 0}, "map": {"version":3,"sources":["file:///project/sandbox/user-workspace/src/app/api/test-login/route.ts"],"sourcesContent":["import { NextResponse } from \"next/server\";\n\nexport async function GET() {\n  return NextResponse.json({\n    universalCredentials: {\n      email: \"demo@travelmarket.com\",\n      password: \"password\"\n    },\n    vendorInfo: {\n      id: \"vendor_123\",\n      name: \"Demo Vendor\",\n      email: \"demo@travelmarket.com\"\n    },\n    loginEndpoint: \"/api/vendors/login\",\n    method: \"POST\",\n    note: \"Use these credentials to login as a vendor and access vendor dashboard features\"\n  });\n}\n"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe;IACpB,OAAO,gJAAY,CAAC,IAAI,CAAC;QACvB,sBAAsB;YACpB,OAAO;YACP,UAAU;QACZ;QACA,YAAY;YACV,IAAI;YACJ,MAAM;YACN,OAAO;QACT;QACA,eAAe;QACf,QAAQ;QACR,MAAM;IACR;AACF","debugId":null}}]
+}

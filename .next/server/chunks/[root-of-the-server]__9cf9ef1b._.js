@@ -89,7 +89,7 @@ async function POST(request) {
         const mockVendor = {
             id: "vendor_123",
             email: "demo@travelmarket.com",
-            password: "Password@123",
+            password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
             name: "Demo Vendor"
         };
         // Check if email exists
